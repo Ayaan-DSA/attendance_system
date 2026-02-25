@@ -1,0 +1,6 @@
+flask
+flask-sqlalchemy
+pymysql
+opencv-python
+opencv-contrib-python
+numpy

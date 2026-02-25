@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Face Recognition Attendance System</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161c27;
+    --surface2: #1e2736;
+    --border: #2a3444;
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #e2e8f0;
+    --muted: #64748b;
+    --header-grad: linear-gradient(135deg, #6c63ff 0%, #a855f7 50%, #ec4899 100%);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    background: var(--header-grad);
+    padding: 14px 28px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  header .icon {
+    width: 40px; height: 40px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  header h1 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 1.5rem;
+    letter-spacing: 0.04em;
+    color: #fff;
+  }
+
+  /* ── Layout ── */
+  .layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  aside {
+    width: 320px;
+    min-width: 280px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 20px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    overflow-y: auto;
+  }
+
+  .section-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    transition: border-color 0.2s;
+  }
+  .section-card.active-section {
+    border-color: var(--accent);
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+    cursor: pointer;
+  }
+  .section-icon {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .icon-capture { background: linear-gradient(135deg, #3b4fd6, #6c63ff); }
+  .icon-train   { background: linear-gradient(135deg, #be185d, #e11d48); }
+  .icon-attend  { background: linear-gradient(135deg, #0d9488, #14b8a6); }
+  .icon-check   { background: linear-gradient(135deg, #c2410c, #f97316); }
+
+  .section-header h3 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.03em;
+  }
+  .section-header p {
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  /* ── Form inputs ── */
+  .form-group { margin-bottom: 12px; }
+  .form-group label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .form-group input {
+    width: 100%;
+    padding: 10px 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .form-group input:focus {
+    border-color: var(--accent);
+  }
+  .form-group input::placeholder { color: var(--muted); }
+
+  /* ── Buttons ── */
+  .btn {
+    width: 100%;
+    padding: 11px;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    text-transform: uppercase;
+  }
+  .btn:active { transform: scale(0.98); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .btn-primary {
+    background: var(--header-grad);
+    color: #fff;
+  }
+  .btn-success {
+    background: linear-gradient(135deg, #16a34a, #22c55e);
+    color: #fff;
+  }
+  .btn-danger {
+    background: linear-gradient(135deg, #b91c1c, #ef4444);
+    color: #fff;
+  }
+  .btn-outline {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text);
+    margin-top: 8px;
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent2); }
+
+  /* Status badge */
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    margin-top: 8px;
+  }
+  .badge-idle    { background: #1e2736; color: var(--muted); border: 1px solid var(--border); }
+  .badge-running { background: #14301e; color: var(--green); border: 1px solid #22c55e44; }
+  .badge-error   { background: #2a1515; color: var(--red);   border: 1px solid #ef444444; }
+  .dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: currentColor;
+  }
+  .dot.pulse {
+    animation: pulse 1.2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* ── Main ── */
+  main {
+    flex: 1;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+  }
+
+  .camera-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .camera-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  .live-indicator {
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--muted);
+  }
+  .live-indicator.active {
+    background: var(--green);
+    box-shadow: 0 0 8px #22c55e88;
+    animation: pulse 1.2s infinite;
+  }
+  .camera-header h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+  }
+
+  .camera-body {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #0a0e16;
+    min-height: 340px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  #camera-feed {
+    max-width: 100%;
+    max-height: 420px;
+    object-fit: contain;
+    display: none;
+    border-radius: 0;
+  }
+  #camera-placeholder {
+    text-align: center;
+    color: var(--muted);
+  }
+  #camera-placeholder .cam-icon {
+    font-size: 56px;
+    margin-bottom: 14px;
+    opacity: 0.3;
+  }
+  #camera-placeholder p { font-size: 0.95rem; }
+  #camera-placeholder small { font-size: 0.8rem; opacity: 0.6; }
+
+  .camera-footer {
+    padding: 14px 18px;
+    display: flex;
+    gap: 10px;
+    border-top: 1px solid var(--border);
+  }
+  .camera-footer .btn { flex: 1; }
+
+  /* ── Attendance Table ── */
+  .attendance-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .attendance-card h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 1rem;
+    letter-spacing: 0.05em;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--border);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  th, td {
+    padding: 10px 18px;
+    text-align: left;
+    font-size: 0.88rem;
+  }
+  th {
+    background: var(--surface2);
+    color: var(--muted);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.75rem;
+  }
+  td { border-top: 1px solid var(--border); }
+  tr:hover td { background: var(--surface2); }
+  #no-attendance {
+    text-align: center;
+    color: var(--muted);
+    padding: 24px;
+    font-size: 0.88rem;
+  }
+
+  /* Toast */
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 18px;
+    font-size: 0.88rem;
+    color: var(--text);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    z-index: 999;
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.3s, transform 0.3s;
+    max-width: 300px;
+  }
+  #toast.show { opacity: 1; transform: translateY(0); }
+  #toast.t-success { border-color: var(--green); }
+  #toast.t-error   { border-color: var(--red); }
+
+  .capture-progress {
+    margin-top: 10px;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    display: none;
+  }
+  .capture-progress-bar {
+    height: 100%;
+    background: var(--header-grad);
+    width: 0%;
+    transition: width 0.3s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="icon">👤</div>
+  <h1>Face Recognition Attendance System</h1>
+</header>
+
+<div class="layout">
+
+  <!-- ── SIDEBAR ── -->
+  <aside>
+
+    <!-- Capture Images -->
+    <div class="section-card" id="card-capture">
+      <div class="section-header">
+        <div class="section-icon icon-capture">📸</div>
+        <div>
+          <h3>Capture Images</h3>
+          <p>Register new student faces</p>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Student Name</label>
+        <input type="text" id="student-name" placeholder="Enter full name" />
+      </div>
+      <div class="form-group">
+        <label>Student ID</label>
+        <input type="text" id="student-id" placeholder="Enter student ID" />
+      </div>
+
+      <button class="btn btn-primary" onclick="startCapture()">START CAPTURE</button>
+      <button class="btn btn-outline" onclick="stopCapture()">STOP CAPTURE</button>
+
+      <div id="capture-status" class="status-badge badge-idle">
+        <span class="dot"></span> Idle
+      </div>
+      <div class="capture-progress" id="capture-progress">
+        <div class="capture-progress-bar" id="capture-bar"></div>
+      </div>
+    </div>
+
+    <!-- Train Model -->
+    <div class="section-card" id="card-train">
+      <div class="section-header">
+        <div class="section-icon icon-train">🎯</div>
+        <div>
+          <h3>Train Model</h3>
+          <p>Update recognition database</p>
+        </div>
+      </div>
+      <button class="btn btn-primary" id="train-btn" onclick="trainModel()">TRAIN MODEL</button>
+      <div id="train-status" class="status-badge badge-idle">
+        <span class="dot"></span> Not trained
+      </div>
+    </div>
+
+    <!-- Take Attendance -->
+    <div class="section-card" id="card-attend">
+      <div class="section-header">
+        <div class="section-icon icon-attend">✅</div>
+        <div>
+          <h3>Take Attendance</h3>
+          <p>Mark student presence</p>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Class Name</label>
+        <input type="text" id="class-name" placeholder="e.g. Math 101, Physics A" />
+      </div>
+      <button class="btn btn-success" onclick="startRecognition()">START RECOGNITION</button>
+      <button class="btn btn-outline" onclick="stopRecognition()">STOP RECOGNITION</button>
+      <div id="recog-status" class="status-badge badge-idle">
+        <span class="dot"></span> Idle
+      </div>
+    </div>
+
+    <!-- Check Attendance -->
+    <div class="section-card" id="card-check">
+      <div class="section-header">
+        <div class="section-icon icon-check">📊</div>
+        <div>
+          <h3>Check Attendance</h3>
+          <p>View attendance records</p>
+        </div>
+      </div>
+      <!-- Date picker -->
+      <div class="form-group">
+        <label>Select Date</label>
+        <input type="date" id="attendance-date" />
+      </div>
+      <div class="form-group">
+        <label>Filter by Class (optional)</label>
+        <input type="text" id="attendance-class" placeholder="Leave blank for all classes" />
+      </div>
+      <button class="btn btn-primary" onclick="loadAttendanceByDate()">VIEW RECORDS</button>
+      <button class="btn btn-outline" onclick="showView('students')">VIEW STUDENTS</button>
+    </div>
+
+  </aside>
+
+  <!-- ── MAIN ── -->
+  <main>
+
+    <!-- ── VIEW: Camera (default) ── -->
+    <div id="view-camera">
+
+      <!-- Stats bar -->
+      <div class="stats-bar">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-students">—</div>
+          <div class="stat-label">Registered</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-today">—</div>
+          <div class="stat-label">Present Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-total">—</div>
+          <div class="stat-label">Total Records</div>
+        </div>
+      </div>
+
+      <!-- Camera feed -->
+      <div class="camera-card">
+        <div class="camera-header">
+          <div class="live-indicator" id="live-dot"></div>
+          <h2>Live Camera Feed</h2>
+        </div>
+        <div class="camera-body">
+          <div id="camera-placeholder">
+            <div class="cam-icon">📷</div>
+            <p>Camera is not active</p>
+            <small>Click "Start Camera" to begin capturing</small>
+          </div>
+          <img id="camera-feed" src="" alt="Live Feed" />
+        </div>
+        <div class="camera-footer">
+          <button class="btn btn-success" onclick="startCamera()">START CAMERA</button>
+          <button class="btn btn-danger"  onclick="stopCamera()">STOP CAMERA</button>
+        </div>
+      </div>
+
+      <!-- Live session log -->
+      <div class="attendance-card">
+        <h2>📋 Live Session Log</h2>
+        <div id="attendance-body">
+          <p class="empty-msg">No attendance recorded yet. Start recognition to begin.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── VIEW: Attendance by date ── -->
+    <div id="view-attendance" style="display:none;">
+      <div class="view-header">
+        <button class="back-btn" onclick="showView('camera')">← Back</button>
+        <h2 id="attendance-view-title">Attendance — <span id="date-label"></span></h2>
+      </div>
+      <div class="attendance-card">
+        <div id="attendance-db-body">
+          <p class="empty-msg">Select a date and click "View Records".</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── VIEW: Students list ── -->
+    <div id="view-students" style="display:none;">
+      <div class="view-header">
+        <button class="back-btn" onclick="showView('camera')">← Back</button>
+        <h2>Registered Students</h2>
+      </div>
+      <div class="attendance-card">
+        <div id="students-body">
+          <p class="empty-msg">Loading…</p>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<style>
+  /* ── Stats bar ── */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-card {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    text-align: center;
+  }
+  .stat-num {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 2rem;
+    font-weight: 700;
+    background: var(--header-grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .stat-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 2px;
+  }
+
+  /* ── View header ── */
+  .view-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .view-header h2 {
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .back-btn {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    transition: border-color 0.2s;
+  }
+  .back-btn:hover { border-color: var(--accent); color: var(--accent2); }
+
+  .empty-msg {
+    text-align: center;
+    color: var(--muted);
+    padding: 28px;
+    font-size: 0.88rem;
+  }
+
+  /* delete btn in table */
+  .del-btn {
+    background: transparent;
+    border: 1px solid #ef444455;
+    color: var(--red);
+    padding: 3px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.78rem;
+    transition: background 0.2s;
+  }
+  .del-btn:hover { background: #ef444422; }
+
+  /* class name tag in table */
+  .class-tag {
+    background: #2a1f5e;
+    color: var(--accent2);
+    border: 1px solid #6c63ff55;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  /* date input dark style */
+  input[type="date"] {
+    color-scheme: dark;
+  }
+</style>
+
+<script>
+  let cameraActive      = false;
+  let attendancePollTimer = null;
+  let capturePollTimer  = null;
+
+  // ── Toast ─────────────────────────────────────────────────────────────────
+  function showToast(msg, type = "success") {
+    const t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = `show t-${type}`;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = ""; }, 3500);
+  }
+
+  function setStatus(id, type, text) {
+    const el  = document.getElementById(id);
+    const cls = type === "running" ? "running" : type === "error" ? "error" : "idle";
+    const dot = type === "running"
+      ? '<span class="dot pulse"></span>'
+      : '<span class="dot"></span>';
+    el.className  = `status-badge badge-${cls}`;
+    el.innerHTML  = `${dot} ${text}`;
+  }
+
+  // ── Views ─────────────────────────────────────────────────────────────────
+  function showView(name) {
+    ["camera","attendance","students"].forEach(v => {
+      document.getElementById(`view-${v}`).style.display = v === name ? "block" : "none";
+    });
+    if (name === "students") loadStudents();
+  }
+
+  // ── Stats ─────────────────────────────────────────────────────────────────
+  async function loadStats() {
+    try {
+      const res  = await fetch("/attendance/stats");
+      const data = await res.json();
+      document.getElementById("stat-students").textContent = data.total_students;
+      document.getElementById("stat-today").textContent    = data.today_count;
+      document.getElementById("stat-total").textContent    = data.total_records;
+    } catch(e) {}
+  }
+
+  // ── Camera ────────────────────────────────────────────────────────────────
+  async function startCamera() {
+    showToast("Starting camera…");
+    try {
+      const res  = await fetch("/start_camera", { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.message || "Camera error", "error"); return; }
+      cameraActive = true;
+      const feed  = document.getElementById("camera-feed");
+      feed.src    = "";
+      setTimeout(() => { feed.src = "/video_feed?t=" + Date.now(); }, 50);
+      feed.style.display = "block";
+      document.getElementById("camera-placeholder").style.display = "none";
+      document.getElementById("live-dot").classList.add("active");
+      showToast("Camera started ✓", "success");
+    } catch(e) { showToast("Could not reach server", "error"); }
+  }
+
+  async function stopCamera() {
+    try { await fetch("/stop_camera", { method: "POST" }); } catch(e) {}
+    cameraActive = false;
+    const feed   = document.getElementById("camera-feed");
+    feed.src     = "";
+    feed.style.display = "none";
+    document.getElementById("camera-placeholder").style.display = "flex";
+    document.getElementById("live-dot").classList.remove("active");
+    setStatus("recog-status",    "idle", "Idle");
+    setStatus("capture-status",  "idle", "Idle");
+    stopAttendancePoll();
+    showToast("Camera stopped");
+  }
+
+  document.getElementById("camera-feed").onerror = function() {
+    if (cameraActive) {
+      showToast("Stream interrupted, retrying…", "error");
+      setTimeout(() => { if (cameraActive) this.src = "/video_feed?t=" + Date.now(); }, 1000);
+    }
+  };
+
+  // ── Registration ──────────────────────────────────────────────────────────
+  async function startCapture() {
+    const name = document.getElementById("student-name").value.trim();
+    const sid  = document.getElementById("student-id").value.trim();
+    if (!name || !sid)  { showToast("Enter both name and student ID", "error"); return; }
+    if (!cameraActive)  { showToast("Start the camera first", "error"); return; }
+    try {
+      const res  = await fetch("/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, student_id: sid })
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.message || "Error", "error"); return; }
+      setStatus("capture-status", "running", "Capturing 0/100");
+      document.getElementById("capture-progress").style.display = "block";
+      document.getElementById("capture-bar").style.width = "0%";
+      showToast(data.message, "success");
+      pollCapture();
+    } catch(e) { showToast("Could not reach server", "error"); }
+  }
+
+  function pollCapture() {
+    clearInterval(capturePollTimer);
+    capturePollTimer = setInterval(async () => {
+      try {
+        const res = await fetch("/registration_status");
+        const d   = await res.json();
+        const pct = Math.min((d.count / 100) * 100, 100);
+        document.getElementById("capture-bar").style.width = pct + "%";
+        if (!d.running) {
+          clearInterval(capturePollTimer);
+          setStatus("capture-status", "idle", `Done (${d.count} images)`);
+          document.getElementById("capture-bar").style.width = "100%";
+          setTimeout(() => { document.getElementById("capture-progress").style.display = "none"; }, 1000);
+          showToast("Face capture complete! Now train the model.", "success");
+          loadStats();
+        } else {
+          setStatus("capture-status", "running", `Capturing ${d.count}/100`);
+        }
+      } catch(e) {}
+    }, 400);
+  }
+
+  async function stopCapture() {
+    await fetch("/stop_register", { method: "POST" });
+    clearInterval(capturePollTimer);
+    setStatus("capture-status", "idle", "Stopped");
+    document.getElementById("capture-progress").style.display = "none";
+    showToast("Capture stopped");
+  }
+
+  // ── Train ─────────────────────────────────────────────────────────────────
+  async function trainModel() {
+    const btn = document.getElementById("train-btn");
+    btn.disabled    = true;
+    btn.textContent = "TRAINING…";
+    setStatus("train-status", "running", "Training…");
+    try {
+      const res  = await fetch("/train_model", { method: "POST" });
+      const data = await res.json();
+      if (res.ok) {
+        setStatus("train-status", "idle", "Trained ✓");
+        showToast(data.message, "success");
+      } else {
+        setStatus("train-status", "error", "Failed");
+        showToast(data.message || "Training failed", "error");
+      }
+    } catch(e) {
+      setStatus("train-status", "error", "Failed");
+      showToast("Could not reach server", "error");
+    }
+    btn.disabled    = false;
+    btn.textContent = "TRAIN MODEL";
+  }
+
+  // ── Recognition ───────────────────────────────────────────────────────────
+  async function startRecognition() {
+    if (!cameraActive) { showToast("Start the camera first", "error"); return; }
+    const class_name = document.getElementById("class-name").value.trim();
+    if (!class_name) { showToast("Enter a class name first", "error"); return; }
+    try {
+      const res  = await fetch("/start_recognition", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ class_name })
+      });
+      const data = await res.json();
+      if (!res.ok) { showToast(data.message || "Error", "error"); return; }
+      setStatus("recog-status", "running", `${class_name}`);
+      showToast(data.message, "success");
+      startAttendancePoll();
+    } catch(e) { showToast("Could not reach server", "error"); }
+  }
+
+  async function stopRecognition() {
+    try { await fetch("/stop_recognition", { method: "POST" }); } catch(e) {}
+    setStatus("recog-status", "idle", "Stopped");
+    stopAttendancePoll();
+    showToast("Recognition stopped");
+    loadStats();
+  }
+
+  function startAttendancePoll() {
+    if (attendancePollTimer) return;
+    attendancePollTimer = setInterval(refreshLiveLog, 2000);
+  }
+  function stopAttendancePoll() {
+    clearInterval(attendancePollTimer);
+    attendancePollTimer = null;
+  }
+
+  async function refreshLiveLog() {
+    try {
+      const res  = await fetch("/attendance_log");
+      const log  = await res.json();
+      const body = document.getElementById("attendance-body");
+      if (!log.length) {
+        body.innerHTML = '<p class="empty-msg">No attendance recorded yet.</p>';
+        return;
+      }
+      let html = `<table>
+        <thead><tr><th>#</th><th>Name</th><th>Student ID</th><th>Class</th><th>Time</th></tr></thead><tbody>`;
+      log.forEach((e, i) => {
+        html += `<tr>
+          <td>${i+1}</td>
+          <td>${e.name}</td>
+          <td>${e.student_id}</td>
+          <td><span class="class-tag">${e.class_name}</span></td>
+          <td>${e.time}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      body.innerHTML = html;
+      loadStats();
+    } catch(e) {}
+  }
+
+  // ── Attendance by date (from DB) ──────────────────────────────────────────
+  async function loadAttendanceByDate() {
+    const dateInput  = document.getElementById("attendance-date").value;
+    const classInput = document.getElementById("attendance-class").value.trim();
+    const date = dateInput || new Date().toISOString().split("T")[0];
+    showView("attendance");
+    document.getElementById("date-label").textContent =
+      classInput ? `${date} — ${classInput}` : date;
+    const body = document.getElementById("attendance-db-body");
+    body.innerHTML = '<p class="empty-msg">Loading…</p>';
+    try {
+      let url = `/attendance?date=${date}`;
+      if (classInput) url += `&class_name=${encodeURIComponent(classInput)}`;
+      const res     = await fetch(url);
+      const records = await res.json();
+      if (!records.length) {
+        body.innerHTML = `<p class="empty-msg">No records found for ${date}${classInput ? " / " + classInput : ""}.</p>`;
+        return;
+      }
+      let html = `<table>
+        <thead><tr><th>#</th><th>Name</th><th>Student ID</th><th>Class</th><th>Time</th></tr></thead><tbody>`;
+      records.forEach((r, i) => {
+        html += `<tr>
+          <td>${i+1}</td>
+          <td>${r.name}</td>
+          <td>${r.student_id}</td>
+          <td><span class="class-tag">${r.class_name}</span></td>
+          <td>${r.time}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      body.innerHTML = html;
+    } catch(e) {
+      body.innerHTML = '<p class="empty-msg">Failed to load records.</p>';
+    }
+  }
+
+  // ── Students list ─────────────────────────────────────────────────────────
+  async function loadStudents() {
+    const body = document.getElementById("students-body");
+    body.innerHTML = '<p class="empty-msg">Loading…</p>';
+    try {
+      const res      = await fetch("/students");
+      const students = await res.json();
+      if (!students.length) {
+        body.innerHTML = '<p class="empty-msg">No students registered yet.</p>';
+        return;
+      }
+      let html = `<table>
+        <thead><tr><th>#</th><th>Name</th><th>Student ID</th><th>Registered</th><th></th></tr></thead><tbody>`;
+      students.forEach((s, i) => {
+        html += `<tr>
+          <td>${i+1}</td>
+          <td>${s.name}</td>
+          <td>${s.student_id}</td>
+          <td>${s.registered_at}</td>
+          <td><button class="del-btn" onclick="deleteStudent('${s.student_id}', '${s.name}')">Remove</button></td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      body.innerHTML = html;
+    } catch(e) {
+      body.innerHTML = '<p class="empty-msg">Failed to load students.</p>';
+    }
+  }
+
+  async function deleteStudent(student_id, name) {
+    if (!confirm(`Remove ${name} (${student_id}) from the database?\nThis will also delete all their attendance records.`)) return;
+    try {
+      const res = await fetch("/students/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ student_id })
+      });
+      const d = await res.json();
+      showToast(d.message, res.ok ? "success" : "error");
+      if (res.ok) { loadStudents(); loadStats(); }
+    } catch(e) {
+      showToast("Could not reach server: " + e.message, "error");
+    }
+  }
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  // Set date picker to today by default
+  document.getElementById("attendance-date").value = new Date().toISOString().split("T")[0];
+  loadStats();
+</script>
+</body>
+</html>
