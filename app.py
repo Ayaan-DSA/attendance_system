@@ -9,9 +9,9 @@ import os
 app = Flask(__name__)
 
 # ── Database config (MySQL via MySQL Workbench) ───────────────────────────────
-#  Change these values to match your MySQL setup:
-DB_USER     = "Your Username here"
-DB_PASSWORD = "YOUR PASSWORD HERE"                    # ← enter your MySQL password here if you have one
+
+DB_USER     = "root"
+DB_PASSWORD = "Mysql%401234"                    # ← enter your MySQL password here if you have one
 DB_HOST     = "localhost"
 DB_PORT     = "3306"
 DB_NAME     = "attendance_system"   # ← must already exist in MySQL Workbench
